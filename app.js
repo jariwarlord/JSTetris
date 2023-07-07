@@ -8,6 +8,10 @@ const playfieldHeight = canvas.height / blockSize;
 let playfield = [];
 let currentPiece = {};
 let gameInterval;
+let level = 1;
+let speed = 1000 / level;
+
+const levelValueElement = document.getElementById('levelValue');
 
 
 function createPlayfield() {
