@@ -1,4 +1,4 @@
-
+// Game variables
 const canvas = document.getElementById('gameCanvas');
 const context = canvas.getContext('2d');
 const blockSize = 20;
@@ -8,12 +8,11 @@ const playfieldHeight = canvas.height / blockSize;
 let playfield = [];
 let currentPiece = {};
 let gameInterval;
+let score = 0;
 let level = 1;
-let speed = 1000 / level;
+let speed = 500;
 
-const levelValueElement = document.getElementById('levelValue');
-
-
+// Initialize the playfield
 function createPlayfield() {
     for (let row = 0; row < playfieldHeight; row++) {
         playfield[row] = [];
@@ -23,7 +22,7 @@ function createPlayfield() {
     }
 }
 
-
+// Draw a block on the canvas
 function drawBlock(x, y, color) {
     context.fillStyle = color;
     context.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
@@ -31,19 +30,19 @@ function drawBlock(x, y, color) {
     context.strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
 }
 
-
+// Draw the playfield
 function drawPlayfield() {
     for (let row = 0; row < playfieldHeight; row++) {
         for (let col = 0; col < playfieldWidth; col++) {
             const block = playfield[row][col];
             if (block) {
-                drawBlock(col, row, block);
+                drawBlock(col, row, 'gray');
             }
         }
     }
 }
 
-
+// Generate a random Tetromino piece
 function generatePiece() {
     const pieces = [
         [[1, 1, 1, 1]],
@@ -63,7 +62,7 @@ function generatePiece() {
     };
 }
 
-
+// Draw the current piece on the playfield
 function drawPiece() {
     currentPiece.piece.forEach((row, y) => {
         row.forEach((block, x) => {
@@ -75,11 +74,13 @@ function drawPiece() {
 }
 
 
+// Move the current piece down
 function movePieceDown() {
     currentPiece.y++;
     if (collides()) {
         currentPiece.y--;
         mergePiece();
+        clearRows();
         currentPiece = generatePiece();
         if (collides()) {
             gameOver();
@@ -87,7 +88,7 @@ function movePieceDown() {
     }
 }
 
-
+// Merge the current piece with the playfield
 function mergePiece() {
     currentPiece.piece.forEach((row, y) => {
         row.forEach((block, x) => {
@@ -98,7 +99,7 @@ function mergePiece() {
     });
 }
 
-
+// Check if the current piece collides with the playfield or the borders
 function collides() {
     for (let row = 0; row < currentPiece.piece.length; row++) {
         for (let col = 0; col < currentPiece.piece[row].length; col++) {
@@ -114,6 +115,26 @@ function collides() {
 }
 
 
+function clearRows() {
+    let rowsCleared = 0;
+
+    for (let row = playfieldHeight - 1; row >= 0; row--) {
+        if (playfield[row].every(block => block !== 0)) {
+            playfield.splice(row, 1);
+            playfield.unshift(new Array(playfieldWidth).fill(0));
+            rowsCleared++;
+        }
+    }
+
+    if (rowsCleared > 0) {
+        score += rowsCleared * 10 * level;
+        updateScore();
+        updateLevel();
+        updateSpeed();
+    }
+}
+
+
 function gameOver() {
     clearInterval(gameInterval);
     context.fillStyle = 'black';
@@ -124,12 +145,12 @@ function gameOver() {
     context.fillText('Game Over', canvas.width / 2, canvas.height / 2);
 }
 
-
+// Clear the playfield
 function clearPlayfield() {
     playfield = playfield.map(row => row.fill(0));
 }
 
-
+// Handle key presses
 function handleKeyPress(event) {
     switch (event.code) {
         case 'ArrowLeft':
@@ -153,7 +174,7 @@ function handleKeyPress(event) {
     }
 }
 
-
+// Rotate the current piece
 function rotatePiece() {
     const tempPiece = currentPiece.piece;
     currentPiece.piece = currentPiece.piece[0].map((_, i) =>
@@ -164,6 +185,34 @@ function rotatePiece() {
     }
 }
 
+// Update the score display
+function updateScore() {
+    const scoreElement = document.getElementById('score');
+    scoreElement.textContent = score;
+}
+
+// Update the level display
+function updateLevel() {
+    const levelElement = document.getElementById('level');
+    levelElement.textContent = level;
+}
+
+// Update the game speed based on the current level
+function updateSpeed() {
+    speed = 500 - (level - 1) * 50;
+    clearInterval(gameInterval);
+    gameInterval = setInterval(gameLoop, speed);
+}
+function updateScoreDisplay(){
+    const scoreElement = document.getElementById('score');
+    scoreElement.textContent = score;
+
+}
+function updateLevelDisplay(){
+    const levelElement = document.getElementById('level');
+    levelElement.textContent = level;
+}
+// Game loop
 function gameLoop() {
     context.clearRect(0, 0, canvas.width, canvas.height);
     drawPlayfield();
@@ -171,13 +220,15 @@ function gameLoop() {
     movePieceDown();
 }
 
-
+// Initialize the game
 function init() {
     createPlayfield();
     currentPiece = generatePiece();
-    gameInterval = setInterval(gameLoop, 500);
+    gameInterval = setInterval(gameLoop, speed);
     document.addEventListener('keydown', handleKeyPress);
+    updateScore();
+    updateLevel();
 }
 
-
+// Start the game
 init();

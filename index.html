@@ -6,12 +6,17 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="level-container">
-    <div class="level">Level: <span id="levelValue">1</span></div>
-
-</div>
-<div class="canvas-container">
-    <canvas id="gameCanvas" width="200" height="400"></canvas>
+<div id="gameContainer">
+    <h1>Tetris</h1>
+    <div id="scoreContainer">
+        <span id="scoreLabel">Score:</span>
+        <span id="score">0</span>
+    </div>
+    <div id="levelContainer">
+        <span id="levelLabel">Level:</span>
+        <span id="level">1</span>
+    </div>
+    <canvas id="gameCanvas" width="240" height="400"></canvas>
 </div>
 
 
